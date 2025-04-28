@@ -1,26 +1,24 @@
-#include <iostream>
 #include "m_vector.h"
-using namespace std;
+#include "iterator.h"
+#include <iostream>
 
 int main() {
-    m_vector<int> vec = {10, 20, 30, 40};
+    m_vector<int> vec{1, 2, 3, 4, 5};
 
-    cout << "Длина вектора: " << vec.get_length() << endl;
+    cout << "Vector: " << vec << endl;
 
-    cout << "Элементы, использующие get_elem(): ";
-    for (int i = 0; i < vec.get_length(); ++i) {
-        cout << vec.get_elem(i) << " ";
+    vec.set_elem(2, 10);
+    cout << "After set_elem: " << vec << endl;
+
+    int value = vec.get_elem(2);
+    cout << "Value at index 2: " << value << endl;
+
+    Iterator<int> it = vec.iterator_begin();
+    while (it != vec.iterator_end()) {
+        cout << it.value() << " ";
+        ++it;
     }
     cout << endl;
-
-    cout << "Элементы, использующие итератор: ";
-    for (auto it = vec.iterator_begin(); it != vec.iterator_end(); ++it) {
-        cout << *it << " ";
-    }
-    cout << endl;
-
-    vec.set_elem(2, 99);
-    cout << "Изменено vec[2] на 99 → vec[2] = " << vec[2] << endl;
 
     return 0;
 }
