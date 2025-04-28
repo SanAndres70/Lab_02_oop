@@ -2,41 +2,48 @@
 #define ITERATOR_H
 
 template<typename T>
+class m_vector;
+
+template<typename T>
 class Iterator {
 private:
-    T* ptr;
+    m_vector<T>& vec;
+    int index;
 
 public:
-    Iterator(T* p) : ptr(p) {}
+    Iterator(m_vector<T>& v, int idx) : vec(v), index(idx) {}
 
     Iterator<T>& operator++() {
-        ++ptr;
+        if (index < vec.get_length())
+            ++index;
         return *this;
     }
 
     T& operator*() const {
-        return *ptr;
+        if (index >= vec.get_length())
+            throw std::out_of_range("Dereferencing end iterator");
+        return vec[index];
     }
 
     bool operator==(const Iterator<T>& other) const {
-        return ptr == other.ptr;
+        return &vec == &other.vec && index == other.index;
     }
 
     bool operator!=(const Iterator<T>& other) const {
-        return ptr != other.ptr;
+        return !(*this == other);
     }
 
-    bool is_end(T* end_ptr) const {
-        return ptr == end_ptr;
+    bool is_end() const {
+        return index >= vec.get_length();
     }
 
     T value() const {
-        return *ptr;
+        return vec.get_elem(index);
     }
 
     Iterator<T> next() const {
-        return Iterator<T>(ptr + 1);
+        return Iterator<T>(vec, index + 1);
     }
 };
 
-#endif
+#endif // ITERATOR_H
