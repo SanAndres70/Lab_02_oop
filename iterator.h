@@ -1,6 +1,8 @@
 #ifndef ITERATOR_H
 #define ITERATOR_H
 
+#include <stdexcept>
+
 template<typename T>
 class m_vector;
 
@@ -11,38 +13,35 @@ private:
     int index;
 
 public:
-    Iterator(m_vector<T>& v, int idx) : vec(v), index(idx) {}
+    Iterator(m_vector<T>& container_obj, int idx = 0) : vec(container_obj), index(idx) {}
 
-    Iterator<T>& operator++() {
-        if (index < vec.get_length())
-            ++index;
-        return *this;
-    }
-
-    T& operator*() const {
-        if (index >= vec.get_length())
-            throw std::out_of_range("Dereferencing end iterator");
-        return vec[index];
-    }
-
-    bool operator==(const Iterator<T>& other) const {
-        return &vec == &other.vec && index == other.index;
-    }
-
-    bool operator!=(const Iterator<T>& other) const {
-        return !(*this == other);
-    }
-
-    bool is_end() const {
-        return index >= vec.get_length();
+    Iterator<T> next() const {
+        return Iterator<T>(vec, index + 1);
     }
 
     T value() const {
         return vec.get_elem(index);
     }
 
-    Iterator<T> next() const {
-        return Iterator<T>(vec, index + 1);
+    bool is_end() const {
+        return index >= vec.get_length();
+    }
+
+    Iterator<T>& operator++() {
+        ++index;
+        return *this;
+    }
+
+    T& operator*() const {
+        return vec.get_elem(index);
+    }
+
+    bool operator==(Iterator<T>& b) {
+        return &vec == &b.vec && index == b.index;
+    }
+
+    bool operator!=(Iterator<T>& b) {
+        return !(*this == b);
     }
 };
 
