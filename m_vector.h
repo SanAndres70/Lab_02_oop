@@ -6,9 +6,6 @@
 #include <stdexcept>
 #include "iterator.h"
 
-using namespace std;
-
-
 template<typename T>
 class m_vector {
 private:
@@ -16,16 +13,15 @@ private:
     int length;
 
 public:
-    m_vector(int length) : length(length) {
-        if (length <= 0) throw invalid_argument("Length must be positive");
+    explicit m_vector(int length) : length(length) {
+        if (length <= 0) throw std::invalid_argument("Length must be positive");
         data = new T[length]{};
     }
 
     m_vector(const m_vector<T>& vect) : length(vect.length) {
         data = new T[length];
-        for (int i = 0; i < length; ++i) {
+        for (int i = 0; i < length; ++i)
             data[i] = vect.data[i];
-        }
     }
 
     m_vector(m_vector<T>&& vect) noexcept : data(vect.data), length(vect.length) {
@@ -33,11 +29,11 @@ public:
         vect.length = 0;
     }
 
-    explicit m_vector(initializer_list<T> lst) : length(lst.size()) {
+    explicit m_vector(std::initializer_list<T> lst) : length(lst.size()) {
         data = new T[length];
-        int idx = 0;
-        for (const auto& elem : lst) {
-            data[idx++] = elem;
+        int i = 0;
+        for (const auto& el : lst) {
+            data[i++] = el;
         }
     }
 
@@ -50,9 +46,8 @@ public:
             delete[] data;
             length = lst.length;
             data = new T[length];
-            for (int i = 0; i < length; ++i) {
+            for (int i = 0; i < length; ++i)
                 data[i] = lst.data[i];
-            }
         }
         return *this;
     }
@@ -63,75 +58,102 @@ public:
 
     void set_elem(int index, const T& elem) {
         if (index < 0 || index >= length)
-            throw out_of_range("Index out of range");
+            throw std::out_of_range("Index out of range");
         data[index] = elem;
     }
 
     T& get_elem(int index) const {
         if (index < 0 || index >= length)
-            throw out_of_range("Index out of range");
+            throw std::out_of_range("Index out of range");
         return data[index];
     }
 
     T* to_array() {
         T* arr = new T[length];
-        for (int i = 0; i < length; ++i) {
+        for (int i = 0; i < length; ++i)
             arr[i] = data[i];
-        }
         return arr;
     }
 
     T& operator[](int index) const {
-        if (index < 0 || index >= length)
-            throw out_of_range("Index out of range");
-        return data[index];
+        return get_elem(index);
     }
 
     template<typename _T>
-    friend ostream& operator<<(ostream& os, const m_vector<_T>& lst) {
+    friend std::ostream& operator<<(std::ostream& os, const m_vector<_T>& lst) {
         os << "[ ";
-        for (int i = 0; i < lst.length; ++i) {
+        for (int i = 0; i < lst.length; ++i)
             os << lst.data[i] << " ";
-        }
         os << "]";
         return os;
     }
 
     m_vector<T>& operator+=(const m_vector<T>& vect) {
         if (length != vect.length)
-            throw invalid_argument("Vectors must have the same length for this operation");
-
-        for (int i = 0; i < length; ++i) {
+            throw std::invalid_argument("Vector lengths must match");
+        for (int i = 0; i < length; ++i)
             data[i] += vect.data[i];
-        }
         return *this;
     }
 
     m_vector<T>& operator-=(const m_vector<T>& vect) {
         if (length != vect.length)
-            throw invalid_argument("Vectors must have the same length for this operation");
-
-        for (int i = 0; i < length; ++i) {
+            throw std::invalid_argument("Vector lengths must match");
+        for (int i = 0; i < length; ++i)
             data[i] -= vect.data[i];
-        }
         return *this;
     }
 
     m_vector<T>& operator*=(const T& val) {
-        for (int i = 0; i < length; ++i) {
+        for (int i = 0; i < length; ++i)
             data[i] *= val;
-        }
         return *this;
     }
 
     m_vector<T>& operator/=(const T& val) {
         if (val == 0)
-            throw invalid_argument("Division by zero");
-
-        for (int i = 0; i < length; ++i) {
+            throw std::invalid_argument("Division by zero");
+        for (int i = 0; i < length; ++i)
             data[i] /= val;
-        }
         return *this;
+    }
+
+    template<typename _T>
+    friend m_vector<_T> operator+(const m_vector<_T>& v1, const m_vector<_T>& v2) {
+        if (v1.length != v2.length)
+            throw std::invalid_argument("Vector lengths must match");
+        m_vector<_T> result(v1.length);
+        for (int i = 0; i < v1.length; ++i)
+            result.data[i] = v1.data[i] + v2.data[i];
+        return result;
+    }
+
+    template<typename _T>
+    friend m_vector<_T> operator-(const m_vector<_T>& v1, const m_vector<_T>& v2) {
+        if (v1.length != v2.length)
+            throw std::invalid_argument("Vector lengths must match");
+        m_vector<_T> result(v1.length);
+        for (int i = 0; i < v1.length; ++i)
+            result.data[i] = v1.data[i] - v2.data[i];
+        return result;
+    }
+
+    template<typename _T>
+    friend m_vector<_T> operator*(const m_vector<_T>& v1, const _T& val) {
+        m_vector<_T> result(v1.length);
+        for (int i = 0; i < v1.length; ++i)
+            result.data[i] = v1.data[i] * val;
+        return result;
+    }
+
+    template<typename _T>
+    friend m_vector<_T> operator/(const m_vector<_T>& v1, const _T& val) {
+        if (val == 0)
+            throw std::invalid_argument("Division by zero");
+        m_vector<_T> result(v1.length);
+        for (int i = 0; i < v1.length; ++i)
+            result.data[i] = v1.data[i] / val;
+        return result;
     }
 
     Iterator<T> iterator_begin() {
